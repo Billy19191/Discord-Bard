@@ -15,18 +15,27 @@ const client = new Client({
 async function testAssistant(message) {
   try {
     const assistant = new BardAPI()
-    const cookie = `egiTigKtY_wMXfXm3bh_luokzNS5-4tavs3TZhXsmPNUWr58Y7R27NJmoqAjVBMbc1f6EA.`
+    const cookie = `egiTioOqqfLM7cCbcyAW97l1ugg59g3oW3BKp1bqg6v3V4geMLMzFOuFg7p9JmbjHNyBYA.`
     // Set session information for authentication
     await assistant.setSession('__Secure-1PSID', cookie) // or '__Secure-3PSID'
     // ...
-
+    if (message.toLowerCase().replace(/\s/g, '') === 'fuckyou') {
+      return `Sorry, I don't understand.`
+    }
     // Send a query to Bard
     const response = await assistant.getBardResponse(message)
-    console.log(response.content)
-    return response.content
+
+    if (response) {
+      console.log(response.content)
+      return response.content
+    } else {
+      throw new Error('This prompt error!')
+    }
     // console.log('Bard:', response.content)
   } catch (error) {
-    console.error('Error:', error)
+    // console.error('Error in testAssistant:', error.message)
+    // Handle the error gracefully, e.g., return a default response or log the error
+    return `Please try again!, I don't understand what you said.`
   }
 }
 
@@ -38,10 +47,14 @@ client.once(Events.ClientReady, (readyClient) => {
 })
 client.on(Events.MessageCreate, async (message) => {
   console.log(message)
-  if (message.content) {
-    // Send back "Pong." to the same channel the message was sent in
-    const answer = await testAssistant(message.content)
-    await message.reply(answer)
+
+  if (message.channelId == 1060215201791758388) {
+    if (message.content && !message.author.bot) {
+      // Send back "Pong." to the same channel the message was sent in
+      const answer =
+        (await testAssistant(message.content)) || "I don't understand"
+      await message.reply(answer)
+    }
   }
 })
 
